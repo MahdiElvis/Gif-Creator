@@ -117,6 +117,20 @@ save("data/$chatid/step.txt","gif");
 	]);		
 }
 elseif($step == "gif"){
+	if(!isset($text)){
+             bot('SendMessage',[
+                 'chat_id'=>$chat_id,
+                 'text'=>"`- لطفا فقط بصورت متن ارسال کنید ...`",
+                 'parse_mode'=>'MarkDown',
+                  'reply_markup'=>json_encode([
+             'inline_keyboard'=>[
+                 [
+                     ['text'=>"برگشت",'callback_data'=>"menu"]
+                     ]
+                 ]
+             ])
+                 ]);
+         }else{
 	save("data/$from_id/step.txt","none");
 	bot('SendDocument',[
 	'chat_id'=>$chat_id,
@@ -133,6 +147,7 @@ elseif($step == "gif"){
 	]
 	])
 	]);
+}
 }
 elseif($data == "menu"){
 	save("data/$chatid/step.txt","none");
@@ -186,7 +201,7 @@ elseif($data == "creategif"){
 //----- ADMIN -----//
 
 elseif(preg_match('/^\/([Pp][Aa][Nn][Ee][Ll])/',$text) && $from_id == "$ADMIN"){
-savea("data/$from_id/step.txt""none");
+save("data/$from_id/step.txt""none");
     bot('SendMessage',[
         'chat_id'=>$chat_id,
         'text'=>"`به منوی مدیریت خوش اومدی ادمین گرامی ...`",
@@ -201,9 +216,7 @@ savea("data/$from_id/step.txt""none");
         ]);
 }
 elseif($data == "panel" && $chatid == "$ADMIN"){
-    $type_open = fopen("data/$chatid/step.txt","w");
-    fwrite($type_open,"none");
-    fclose($type_open);
+    save("data/$chatid/step.txt","none");
     bot('EditMessageText',[
         'chat_id'=>$chatid,
 		'message_id'=>$message_id,
@@ -237,7 +250,7 @@ elseif($data == "stats" && $chatid == "$ADMIN"){
         ]);
 }
 elseif($data == "public_message" && $from_id == "$ADMIN"){
-    file_put_contents("data/$chatid/step.txt","Send to All");
+    save("data/$chatid/step.txt","Send to All");
     bot('EditMessageText',[
         'chat_id'=>$chatid,
 		'message_id'=>$message_id,
@@ -253,7 +266,7 @@ elseif($data == "public_message" && $from_id == "$ADMIN"){
         ]);
 }
 elseif($step == "Send to All"){
-    file_put_contents("data/$from_id/step.txt","none");
+    save("data/$from_id/step.txt","none");
     $all_member = fopen( "Member.txt", "r");
   while( !feof( $all_member)) {
     $user = fgets( $all_member);
