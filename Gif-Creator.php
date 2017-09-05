@@ -4,7 +4,7 @@ ob_start();
 
 define('API_KEY','توکن');
 
-//---------------------//
+//----- Functions -----//
 function bot($method,$datas=[]){
     $url = "https://api.telegram.org/bot".API_KEY."/".$method;
     $ch = curl_init();
@@ -46,7 +46,14 @@ function sendphoto($chat_id, $photo, $captionl){
         "message_id"=>$update->message->message_id,
     ]);
  }
-//-----Variables-----//
+function save($filename,$TXTdata)
+  {
+  $myfile = fopen($filename, "w") or die("Unable to open file!");
+  fwrite($myfile, "$TXTdata");
+  fclose($myfile);
+  }
+
+//----- Variables -----//
  
 $update = json_decode(file_get_contents('php://input'));
 $message = $update->message;
@@ -62,15 +69,15 @@ $message_id = $update->callback_query->message->message_id;
 $step = file_get_contents("data/$from_id/step.txt");
 $ADMIN = "آیدی عددی ادمین";
 //کد Api دریافت گیف
-$gif_info = json_decode(file_get_contents("http://batsazfree.tk/gif.php?text=".$text.""));
+$gif_info = json_decode(file_get_contents("http://batsazfree.tk/gif.php?text=$text"));
 $gif = $gif_info->src;
 
-//-----Bot Codes-----//
+//----- Bot Codes -----//
 flush();
-//تشخیص متن استارت
-if(preg_match('/^\/([Ss][Tt][Aa][Rr][Tt])/',$text)){
 mkdir("data");
 mkdir("data/$from_id");
+//تشخیص متن استارت
+if(preg_match('/^\/([Ss][Tt][Aa][Rr][Tt])/',$text)){
 $user = file_get_contents('Member.txt');
     $members = explode("\n",$user);
     if (!in_array($chat_id,$members)){
@@ -95,9 +102,7 @@ bot('sendMessage',[
 ]);
 }
 elseif($data == "gif"){
-$type_open = fopen("data/$chatid/step.txt","w");
-    fwrite($type_open,"gif");
-    fclose($type_open);
+save("data/$chatid/step.txt","gif");
 	bot('EditMessageText',[
 	'chat_id'=>$chatid,
 	'message_id'=>$message_id,
@@ -112,7 +117,7 @@ $type_open = fopen("data/$chatid/step.txt","w");
 	]);		
 }
 elseif($step == "gif"){
-	file_put_contents("data/$from_id/step.txt","none");
+	save("data/$from_id/step.txt","none");
 	bot('SendDocument',[
 	'chat_id'=>$chat_id,
 	'document'=>$gif,
@@ -130,7 +135,7 @@ elseif($step == "gif"){
 	]);
 }
 elseif($data == "menu"){
-	file_put_contents("data/$chatid/step.txt","none");
+	save("data/$chatid/step.txt","none");
 	bot('EditMessageText',[
 	'chat_id'=>$chatid,
 	'message_id'=>$message_id,
@@ -147,7 +152,7 @@ elseif($data == "menu"){
 	]);
 }
 elseif($data == "menuu"){
-	file_put_contents("data/$chatid/step.txt","none");
+	save("data/$chatid/step.txt","none");
 	bot('SendMessage',[
 	'chat_id'=>$chatid,
 	'message_id'=>$message_id,
@@ -164,7 +169,7 @@ elseif($data == "menuu"){
 	]);
 }
 elseif($data == "creategif"){
-	file_put_contents('batsazfree.txt',"gif");
+	save("data/$chatid/step.txt","gif");
 	bot('SendMessage',[
 	'chat_id'=>$chatid,
 	'text'=>"لطفا پیام خود را فقط در قالب متن ارسال کنید ...",
@@ -178,12 +183,10 @@ elseif($data == "creategif"){
 	]);		
 }
 
-//-----ADMIN-----//
+//----- ADMIN -----//
 
-elseif($text == "/panel" && $from_id == "$ADMIN"){
-    $type_open = fopen('batsazfree.txt',"w");
-    fwrite($type_open,"none");
-    fclose($type_open);
+elseif(preg_match('/^\/([Pp][Aa][Nn][Ee][Ll])/',$text) && $from_id == "$ADMIN"){
+savea("data/$from_id/step.txt""none");
     bot('SendMessage',[
         'chat_id'=>$chat_id,
         'text'=>"`به منوی مدیریت خوش اومدی ادمین گرامی ...`",
