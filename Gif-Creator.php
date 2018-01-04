@@ -1,205 +1,128 @@
 <?php
-
+# In The Name Of GOD #
+# Writer : @Mahdi_Elvis #
 ob_start();
-
 define('API_KEY','توکن');
-
-//----- Functions -----//
+define('ADMIN','آیدی عددی ادمین');
+// === Functions === //
+// Bot
 function bot($method,$datas=[]){
-    $url = "https://api.telegram.org/bot".API_KEY."/".$method;
-    $ch = curl_init();
-    curl_setopt($ch,CURLOPT_URL,$url);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($ch,CURLOPT_POSTFIELDS,$datas);
-    $res = curl_exec($ch);
-    if(curl_error($ch)){
-        var_dump(curl_error($ch));
-    }else{
-        return json_decode($res);
-    }
-}
-function sendmessage($chat_id, $text, $model){
- bot('sendMessage',[
- 'chat_id'=>$chat_id,
- 'text'=>$text,
- 'parse_mode'=>$mode
- ]);
-}
-function sendphoto($chat_id, $photo, $captionl){
- bot('sendphoto',[
- 'chat_id'=>$chat_id,
- 'photo'=>$photo,
- 'caption'=>$caption,
- ]);
- }
- function sendvideo($chat_id, $video, $caption){
- bot('sendvideo',[
- 'chat_id'=>$chat_id,
- 'video'=>$video,
- 'caption'=>$caption
- ]);
- }
- function forwardmessage($chat_id, $from_chat_id, $message_id){
-     bot('forwardMessage',[
-        "chat_id"=>$chat_id,
-        "from_chat_id"=>$chat_id,
-        "message_id"=>$update->message->message_id,
-    ]);
- }
-function save($filename,$TXTdata)
-  {
-  $myfile = fopen($filename, "w") or die("Unable to open file!");
-  fwrite($myfile, "$TXTdata");
-  fclose($myfile);
-  }
-
-//----- Variables -----//
- 
-$update = json_decode(file_get_contents('php://input'));
-$message = $update->message;
-$from_id = $message->from->id;
-$chat_id = $message->chat->id;
-$first_name = $message->from->first_name;
-$last_name = $message->from->last_name;
-$username = $message->from->userame;
-$text = $message->text;
-$chatid = $update->callback_query->message->chat->id;
-$data = $update->callback_query->data;
-$message_id = $update->callback_query->message->message_id;
-$step = file_get_contents("data/$from_id/step.txt");
-$ADMIN = "آیدی عددی ادمین";
-//کد Api دریافت گیف
-$gif_info = json_decode(file_get_contents("http://batsazfree.tk/gif.php?text=$text"));
-$gif = $gif_info->src;
-
-//----- Bot Codes -----//
-flush();
-mkdir("data");
-mkdir("data/$from_id");
-//تشخیص متن استارت
-if(preg_match('/^\/([Ss][Tt][Aa][Rr][Tt])/',$text)){
-$user = file_get_contents('Member.txt');
-    $members = explode("\n",$user);
-    if (!in_array($chat_id,$members)){
-      $add_user = file_get_contents('Member.txt');
-      $add_user .= $chat_id."\n";
-     file_put_contents('Member.txt',$add_user);
-    }
-bot('sendMessage',[
- 'chat_id'=>$chat_id,
- 'text'=>"سلام <a href='https://t.me/'>$first_name</a> ...	
-به ربات ساخت گیف خوش اومدی !!
-
-جهت ساخت گیف دکمه زیر رو لمس کن ...",
-	'parse_mode'=>'HTML',
-	'reply_markup'=>json_encode([
-	'inline_keyboard'=>[
-	[
-	['text'=>"ساخت گیف",'callback_data'=>"gif"]
-	]
-	]
-])
+$url = "https://api.telegram.org/bot".API_KEY."/".$method;
+$ch = curl_init();
+curl_setopt($ch,CURLOPT_URL,$url);
+curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+curl_setopt($ch,CURLOPT_POSTFIELDS,$datas);
+$res = curl_exec($ch);
+if(curl_error($ch)){
+var_dump(curl_error($ch));
+}else{
+return json_decode($res);
+}}
+// Send Action
+function SendAction($chat_id,$action='typing'){
+return bot('SendChatAction',[
+'chat_id'=>$chat_id,
+'action'=>$action
 ]);
 }
+// Send Message
+function SendMessage($chat_id,$text,$parse_mode='HTML',$keyboard,$reply,$disable='true'){
+return bot('SendMessage',[
+'chat_id'=>$chat_id,
+'text'=>$text,
+'parse_mode'=>$parse_mode,
+'reply_to_message_id'=>$reply,
+'reply_markup'=>$keyboard
+]);
+}
+// Edit Message 
+function EditMessage($chat_id,$message_id,$text,$parse_mode='HTML',$keyboard){
+return bot('EditMessageText',[
+'chat_id'=>$chat_id,
+'message_id'=>$message_id,
+'text'=>$text,
+'parse_mode'=>$parse_mode,
+'reply_markup'=>$keyboard
+]);
+}
+// Send Document
+function SendDocument($chatid,$document,$reply,$keyboard,$caption){
+return bot('SendDocument',[
+'chat_id'=>$chatid,
+'document'=>$document,
+'caption'=>$caption,
+'reply_to_message_id'=>$reply,
+'reply_markup'=>$keyboard
+]);
+}
+// Answer Callback Query
+function AnswerCallbackQuery($callback_id,$text,$show_alert){
+return bot('AnswerCallbackQuery',[
+'callback_query_id'=>$callback_id,
+'text'=>$text,
+'show_alert'=>$show_alert
+]);    
+}
+// === Variables === //
+// Keyboards
+$keyboard = json_encode([
+'inline_keyyboard'=>[[['text'=>"ساخت گیف",'callback_data'=>"gif"]]]
+]);
+$back = json_encode([
+'inline_keyyboard'=>[[['text'=>"برگشت",'callback_data'=>"back"]]]
+])
+// Input
+$update = json_decode(file_get_contents('php://input'));
+$message = $update->message;
+$callback_query = $update->callback_query;
+$message_id = $message->message_id;
+$messageid = $callback_query->message->message_id;
+$from_id = $message->from->id;
+$fromid = $callback_query->from->id;
+$chat_id = $message->chat->id;
+$chatid = $callback_query->message->chat->id;
+$text = $message->text;
+$data = $callback_query->data;
+$callback_id = $callback_query->id;
+$first_name = $message->from->first_name;
+$username = $message->from->userame;
+$command = file_get_contents("data/$from_id/command.txt");
+// == Start Source === //
+flush();
+if(!file_exists("data/$from_id")){
+if(!file_exists("data")){
+mkdir("data");
+}
+mkdir("data/$from_id");
+}
+// === Start Command === //
+if(preg_match('/^\/([Ss][Tt][Aa][Rr][Tt])/',$text) && mb_strlen($text) == 6){
+SendAction($chat_id);
+$user = file_get_contents('Member.txt');
+$members = explode("\n",$user);
+if(!in_array($chat_id,$members)){
+file_put_contents('Member.txt',$members."$from_id\n");
+}
+SendMessage($chat_id,"سلام <a href='tg://user?id=$from_id'>$first_name</a> ...
+
+به ربات ساخت گیف خوش اومدی !!",'HTML',$keyboard,$message_id);
+}
 elseif($data == "gif"){
-save("data/$chatid/step.txt","gif");
-	bot('EditMessageText',[
-	'chat_id'=>$chatid,
-	'message_id'=>$message_id,
-	'text'=>"لطفا پیام خود را فقط در قالب متن ارسال کنید ...",
-	'reply_markup'=>json_encode([
-	'inline_keyboard'=>[
-	[
-	['text'=>"برگشت",'callback_data'=>"menu"]
-	]
-	]
-	])
-	]);		
+AnswerCallbackQuery($callback_id,"لطفا کمی صبر کنید ...");
+file_put_contents("data/$fromid/command.txt","gif");
+EditMessage($chatid,$messageid,"لطفا متن خود را ارسال کنید :",'HTML',$back);		
 }
-elseif($step == "gif"){
-	if(!isset($text)){
-             bot('SendMessage',[
-                 'chat_id'=>$chat_id,
-                 'text'=>"`- لطفا فقط بصورت متن ارسال کنید ...`",
-                 'parse_mode'=>'MarkDown',
-                  'reply_markup'=>json_encode([
-             'inline_keyboard'=>[
-                 [
-                     ['text'=>"برگشت",'callback_data'=>"menu"]
-                     ]
-                 ]
-             ])
-                 ]);
-         }else{
-	save("data/$from_id/step.txt","none");
-	bot('SendDocument',[
-	'chat_id'=>$chat_id,
-	'document'=>$gif,
-	'caption'=>"گیف شما ساخته شد !!",
-	'reply_markup'=>json_encode([
-	'inline_keyboard'=>[
-	[
-	['text'=>"ساخت دوباره",'callback_data'=>"creategif"]
-	],
-	[
-	['text'=>"برگشت",'callback_data'=>"menuu"]
-	]
-	]
-	])
-	]);
-}
-}
-elseif($data == "menu"){
-	save("data/$chatid/step.txt","none");
-	bot('EditMessageText',[
-	'chat_id'=>$chatid,
-	'message_id'=>$message_id,
-	'text'=>"به منوی اصلی برگشتید ...
-	
-انتخاب کنید ...",
-'reply_markup'=>json_encode([
-'inline_keyboard'=>[
-[
-['text'=>"ساخت گیف",'callback_data'=>"gif"]
-]
-]
-])
-	]);
-}
-elseif($data == "menuu"){
-	save("data/$chatid/step.txt","none");
-	bot('SendMessage',[
-	'chat_id'=>$chatid,
-	'message_id'=>$message_id,
-	'text'=>"به منوی اصلی برگشتید ...
-	
-انتخاب کنید ...",
-'reply_markup'=>json_encode([
-'inline_keyboard'=>[
-[
-['text'=>"ساخت گیف",'callback_data'=>"gif"]
-]
-]
-])
-	]);
-}
-elseif($data == "creategif"){
-	save("data/$chatid/step.txt","gif");
-	bot('SendMessage',[
-	'chat_id'=>$chatid,
-	'text'=>"لطفا پیام خود را فقط در قالب متن ارسال کنید ...",
-	'reply_markup'=>json_encode([
-	'inline_keyboard'=>[
-	[
-	['text'=>"برگشت",'callback_data'=>"menu"]
-	]
-	]
-	])
-	]);		
-}
-
+elseif($command == "gif"){
+if($text){
+SendAction($chat_id,'upload_documnet');
+file_put_contents("data/$from_id/command.txt",'');
+$gif = json_decode(file_get_contents("http://www.flamingtext.com/net-fu/image_output.cgi?_comBuyRedirect=false&script=blue-fire&text=".urlencode($text)."&symbol_tagname=popular&fontsize=70&fontname=futura_poster&fontname_tagname=cool&textBorder=15&growSize=0&antialias=on&hinting=on&justify=2&letterSpacing=0&lineSpacing=0&textSlant=0&textVerticalSlant=0&textAngle=0&textOutline=off&textOutline=false&textOutlineSize=2&textColor=%230000CC&angle=0&blueFlame=on&blueFlame=false&framerate=75&frames=5&pframes=5&oframes=4&distance=2&transparent=off&transparent=false&extAnim=gif&animLoop=on&animLoop=false&defaultFrameRate=75&doScale=off&scaleWidth=240&scaleHeight=120&&_=1469943010141"))->src;
+SendDocument($chat_id,$gif,"گیف شما با موفقیت ساخته شد !!",$back_,$message_id);
+}else{
+SendAction($chat_id);
+SendMessage($chat_id,"لطفا فقط بصورت متن ارسال کنید !!",'HTML',$back,$message_id);
+}}
 //----- ADMIN -----//
-
 elseif(preg_match('/^\/([Pp][Aa][Nn][Ee][Ll])/',$text) && $from_id == "$ADMIN"){
 save("data/$from_id/step.txt""none");
     bot('SendMessage',[
@@ -285,11 +208,4 @@ elseif($step == "Send to All"){
             ])
       ]);
 }
-
-//-----ADMIN-----//
-
-//-----Bot Codes-----//
-
-// نوشته شده توسط : @Mahdi_Elvis
-
 ?>
